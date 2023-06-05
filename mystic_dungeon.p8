@@ -417,13 +417,14 @@ function make_game_object(name,x,y,props)
 			--enemy turn
 			if self.turn then
 				if self.turn_timer<40 then
-					--reset damage taken
-					self.damage_taken,self.fire,self.ice,self.strike,self.rock=0,false,false,false,false
 					camera(0,0)
 				end
 
 				if self.turn_timer<30 then
 					for_each_game_object("player",function(player)
+						--reset damage taken
+						self.damage_taken,self.fire,self.ice,self.strike,self.rock=0,false,false,false,false
+
 						--random damage amount
 						local random = flr(rnd(9))
 
@@ -465,11 +466,6 @@ function make_game_object(name,x,y,props)
 					draw_explosion({13,12,12,7})
 				elseif self.strike or self.rock then
 					draw_explosion({5,5,6,7})
-				end
-
-				if self.rock then
-					--screen shake
-					screen_shake(0.1)
 				end
 			elseif self.turn_timer<30 and self.turn_timer>0 then
 				--if hit player or missed
@@ -1389,8 +1385,7 @@ end
 
 --screen shake
 function screen_shake(intesity)
-	local shakex=16-rnd(32)
-	local shakey=16-rnd(32)
+	local shakex,shakey=16-rnd(32),16-rnd(32)
 	camera(shakex*intesity,shakey*intesity)
 end
 
