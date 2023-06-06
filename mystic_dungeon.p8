@@ -416,10 +416,6 @@ function make_game_object(name,x,y,props)
 		deal_damage=function(self,dmg)
 			--enemy turn
 			if self.turn then
-				if self.turn_timer<40 then
-					camera(0,0)
-				end
-
 				if self.turn_timer<30 then
 					for_each_game_object("player",function(player)
 						--reset damage taken
