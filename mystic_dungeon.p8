@@ -1574,14 +1574,38 @@ function random_map()
 					2,2,2,2,2,2,2,2]]),
 				{true,true,false,true}})
 
+	--generate rooms
+	local top_left,top_right,bottom_left,bottom_right
+
+	--generate top left room until it has a door on either the right and bottom
+	repeat
+		top_left=rooms[flr(rnd(#rooms))+1]
+	until top_left[2][2] and top_left[2][3]
+
+	--generate bottom right room until it has a door on either the left and top
+	repeat
+		bottom_right=rooms[flr(rnd(#rooms))+1]
+	until bottom_right[2][4] and bottom_right[2][1]
+
+	--generate top right room until its doors match the doors of either the tl room or br room
+	repeat
+		top_right=rooms[flr(rnd(#rooms))+1]
+	until top_right[2][4] or top_right[2][3]
+
+	--generate top right room until its doors match the doors of either the tl room or br room
+	repeat
+		bottom_left=rooms[flr(rnd(#rooms))+1]
+	until bottom_left[2][1] or bottom_left[2][2]
+
+	--new map
+	local new_map={top_left[1],top_right[1],bottom_left[1],bottom_right[1]}
+
 	--debug data
 	----------------------
 	local room_tile_data=""
 	local tile_count=0
-	local room_door_data=""
-	local door_count=0
-	for room in all(rooms) do
-		for tile in all(room[1]) do
+	for room in all(new_map) do
+		for tile in all(room) do
 			room_tile_data=room_tile_data.. tostr(tile).. ","
 			tile_count+=1
 			if tile_count%8==0 then
@@ -1591,53 +1615,71 @@ function random_map()
 				room_tile_data=room_tile_data.. "\n\n"
 			end
 		end
-
-		for door in all(room[2]) do
-			room_door_data=room_door_data.. tostr(door).. ","
-			door_count+=1
-			if door_count%4==0 then
-				room_door_data=room_door_data	.. "\n\n"
-			end
-		end
 	end
 
 	printh(room_tile_data,"md_room_tiles.txt",1)
-	printh(room_door_data,"md_room_doors.txt",1)
 	-----------------------------
 
-	--new map
-	local new_map={}
+	--[[local tile_counter=0
+	for room in all(new_map) do
+		local map_x,map_y=0,0
 
-	--generate first room until it has a door on either the right or bottom
-	repeat
-		local rand_room=flr(rnd(#rooms))+1
-	until rooms[rand_room][2][2] or rooms[rand_room][2][3]
+		for tile in all(room) do
+			mset(map_x,map_y,tile)
 
-	add(new_map,rooms[rand_room])
+			tile_count+=1
 
-	local tile_counter=1
-	for x=0,8 do
-		for y=0,8 do
-			--place map tiles
-			mset(x,y,new_map[tile_counter])
+			if tile_count%8==0 then
+				--move down one
+				map_y+=1
+				--reset x
+				map_x=0
+			else
+				--continue counting up x unitl 8
+				map_x+=1
+			end
 
-			--increment room tiles
+			if tile_count==64 or tile_count==192 then
+				map_x+=8
+			end
+
+			if tile_count==128 then
+				map_y+=8
+			end 
+		end
+	end]]--
+
+	--place all four rooms
+	for i=1,4 do
+		--place each room in correct orientation
+		local tile_counter,map_x,map_y=0,0,0
+		--change x and y based on what room is being set
+		if i%2==0 then
+			map_x+=8
+		end
+		if i==3 then
+			map_y+=8
+		end
+
+		for j=1,64 do
+			--count up tile
 			tile_counter+=1
+
+			--set tile in map
+			mset(map_x,map_y,new_map[i][tile_counter])
+
+			--check if gone through a row of 8 tiles
+			if j%8==0 then
+				--move down one
+				map_y+=1
+				--reset x
+				map_x=0
+			else
+				--continue counting up x unitl 8
+				map_x+=1
+			end
 		end
 	end
-
-
-	--[[loop through map
-	local tile_counter=1
-	for x=0,15 do
-		for y=0,15 do
-			--place map tiles
-			mset(x,y,new_map[tile_counter])
-
-			--increment room tiles
-			tile_counter+=1
-		end
-	end--]]
 
 	--place outer walls
 	for outer_x=0,15 do
