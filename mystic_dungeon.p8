@@ -1592,98 +1592,53 @@ function random_map()
 		top_right=rooms[flr(rnd(#rooms))+1]
 	until top_right[2][4] or top_right[2][3]
 
-	--generate top right room until its doors match the doors of either the tl room or br room
-	repeat
-		bottom_left=rooms[flr(rnd(#rooms))+1]
-	until bottom_left[2][1] or bottom_left[2][2]
+	--if top right room has both sides open then bottom left can have either top or right open
+	--else both must be open to prevent map being split
+	if top_right[2][4] and top_right[2][3] then
+		repeat
+			bottom_left=rooms[flr(rnd(#rooms))+1]
+		until bottom_left[2][1] or bottom_left[2][2]
+	else
+		repeat
+			bottom_left=rooms[flr(rnd(#rooms))+1]
+		until bottom_left[2][1] and bottom_left[2][2]
+	end
 
 	--new map
 	local new_map={top_left[1],top_right[1],bottom_left[1],bottom_right[1]}
 
-	--debug data
-	----------------------
-	local room_tile_data=""
-	local tile_count=0
-	for room in all(new_map) do
-		for tile in all(room) do
-			room_tile_data=room_tile_data.. tostr(tile).. ","
-			tile_count+=1
-			if tile_count%8==0 then
-				room_tile_data=room_tile_data.. "\n"
-			end
-			if tile_count%64==0 then
-				room_tile_data=room_tile_data.. "\n\n"
-			end
-		end
-	end
-
-	printh(room_tile_data,"md_room_tiles.txt",1)
-	-----------------------------
-
-	--[[local tile_counter=0
-	for room in all(new_map) do
-		local map_x,map_y=0,0
-
-		for tile in all(room) do
-			mset(map_x,map_y,tile)
-
-			tile_count+=1
-
-			if tile_count%8==0 then
-				--move down one
-				map_y+=1
-				--reset x
-				map_x=0
-			else
-				--continue counting up x unitl 8
-				map_x+=1
-			end
-
-			if tile_count==64 or tile_count==192 then
-				map_x+=8
-			end
-
-			if tile_count==128 then
-				map_y+=8
-			end 
-		end
-	end]]--
-
-	--place all four rooms
+	--place 8x8 rooms 4 times
 	for i=1,4 do
-		--place each room in correct orientation
-		local tile_counter,map_x,map_y=0,0,0
-		--change x and y based on what room is being set
+		local tile_counter,x_offset,y_offset=1,0,0
+
+		--make sure place rooms in correct position
 		if i%2==0 then
-			map_x+=8
+			x_offset=8
+		else
+			x_offset=0
 		end
-		if i==3 then
-			map_y+=8
+
+		if i>2 then
+			y_offset=8
+		else
+			y_offset=0
 		end
 
-		for j=1,64 do
-			--count up tile
-			tile_counter+=1
+		--place tiles on map
+		for map_y=0,7 do
+			for map_x=0,7 do
+				--set tiles
+				mset(map_x+x_offset,map_y+y_offset,new_map[i][tile_counter])
 
-			--set tile in map
-			mset(map_x,map_y,new_map[i][tile_counter])
-
-			--check if gone through a row of 8 tiles
-			if j%8==0 then
-				--move down one
-				map_y+=1
-				--reset x
-				map_x=0
-			else
-				--continue counting up x unitl 8
-				map_x+=1
+				--count up tile
+				tile_counter+=1
 			end
 		end
 	end
 
 	--place outer walls
-	for outer_x=0,15 do
-		for outer_y=0,15 do
+	for outer_y=0,15 do
+		for outer_x=0,15 do
 			if outer_x==0 or outer_x==15 or outer_y==0 or outer_y==15 then
 				mset(outer_x,outer_y,2)
 			end
@@ -2108,13 +2063,13 @@ __gfx__
 0070070001aa9910665555ff1a3ccd2100000000011878888888811000000000000711ccccccccccccccc7c77c11000066666666666600005555555555550000
 000000000019910065ffff5f41ccd2140000000001187888888881100000000000071ccccccccccccccccc7cccc1100066666666666666005555555555555500
 00000000000110005ffffff5441111440000070001187888888881100000000000111ccccccc7777cccccc7cccc1110066666666666666665555555555555555
-00111110000110001111111144111144000007000118888888888110000000000011cccccc777777777ccc7ccccd110000000000000000000000000000000000
-01ddddd1001aa100144444414418814401117177111888888888211111111110011cccccc77777777777cc7ccccdd11000000000000000000000000000000000
-0166d8d101aaa910144444411118811111111711111888888888211111111111011ccccc777777777777cccccccdd11000000000000000000000000000000000
-01d6dd6101aa9910144444411888882111888788888888888882222222222f11011cccc7777777777777cccccccdd11000000000000000000000000000000000
-166ddd1001199110144444411888822111888788888888888882222222222f1111ccccc77777777777cccccccccddd1100000000000000000000000000000000
-1ddd66101a11119114444441111821111188888888888888882222222222ff1111cccc77777777777cccccccccdddd1100000000000000000000000000000000
-1dcddd1001aaa91014444441441221441188888888888888882222222222ff1111cccc7777777777ccccccccccdddd1100000000000000000000000000000000
+00111110000110004444444144111144000007000118888888888110000000000011cccccc777777777ccc7ccccd110000000000000000000000000000000000
+01ddddd1001aa100444444414418814401117177111888888888211111111110011cccccc77777777777cc7ccccdd11000000000000000000000000000000000
+0166d8d101aaa910444444411118811111111711111888888888211111111111011ccccc777777777777cccccccdd11000000000000000000000000000000000
+01d6dd6101aa9910444444411888882111888788888888888882222222222f11011cccc7777777777777cccccccdd11000000000000000000000000000000000
+166ddd1001199110444444411888822111888788888888888882222222222f1111ccccc77777777777cccccccccddd1100000000000000000000000000000000
+1ddd66101a11119144444441111821111188888888888888882222222222ff1111cccc77777777777cccccccccdddd1100000000000000000000000000000000
+1dcddd1001aaa91044444441441221441188888888888888882222222222ff1111cccc7777777777ccccccccccdddd1100000000000000000000000000000000
 01111100001111001111111144111144118888888888888882222222222fff1111cccc77777777ccccccccccccdddd1100000000000000000000000000000000
 00000000000001000000000044111144118888888888888822222222222fff1111cccc7777777ccccccccccccddddd11ff000000000000000111100000000000
 00000000001119100000000041cccc1411888888888888822222222222ffff1111cccc777777cccccccccccccdddd211ffff0000000000001111110000000000
