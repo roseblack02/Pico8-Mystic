@@ -29,7 +29,7 @@ function _init()
 	--pickup items and ladder
 	item_y,rand_item,health_item,mp_item,ladder,power_item=30
 	--enemy encounter
-	encounter,imp_encounter,slime_encounter,skeleton_encounter,ghost_encounter,troll_encounter,snake_encounter,flatwoods_encounter=false
+	encounter,moth_encounter,imp_encounter,slime_encounter,skeleton_encounter,ghost_encounter,troll_encounter,snake_encounter,flatwoods_encounter=false
 	--player stats
 	counter,counter_colour,max_health,health,max_mp,mp,power,floor,points,class=0,12,50,50,40,40,1.1,0,0,""
 	--objects
@@ -193,12 +193,13 @@ function start_game()
 	make_snake()
 	make_troll()
 	make_imp()
+	make_moth()
 	make_player()
 	--generate map
 	random_map()
 	--reset stats
 	--enemy encounter
-	encounter,imp_encounter,slime_encounter,skeleton_encounter,ghost_encounter,troll_encounter,snake_encounter,flatwoods_encounter=false,false,false,false,false,false,false,false
+	encounter,moth_encounter,imp_encounter,slime_encounter,skeleton_encounter,ghost_encounter,troll_encounter,snake_encounter,flatwoods_encounter=false,false,false,false,false,false,false,false
 	--player stats
 	counter,counter_colour,floor,points=0,12,0,0
 	--changhe stats based on class
@@ -506,9 +507,9 @@ function make_game_object(name,x,y,props)
 		end,
 		enemy_increase_stats=function(self)
 			--increase difficulty
-			self.max_health*=(1+(floor/30))
+			self.max_health*=(1+(floor/60))
 			self.health=self.max_health
-			self.damage*=(1+(floor/50))
+			self.damage*=(1+(floor/60))
 			--limit hp
 			self.max_health=mid(1,self.max_health,120)
 		end,
@@ -613,7 +614,7 @@ function make_player(x,y)
 							--start encounter
 							encounter=true
 							--choose enemy
-							local random_enemy = flr(rnd(11))
+							local random_enemy = flr(rnd(12))
 							if random_enemy < 3 then
 								slime_encounter=true
 							elseif random_enemy >= 3 and random_enemy < 5 then
@@ -626,6 +627,8 @@ function make_player(x,y)
 								flatwoods_encounter=true
 							elseif random_enemy ==9 then
 								imp_encounter=true
+							elseif random_enemy ==10 then
+								moth_encounter=true
 							else
 								snake_encounter=true
 							end
@@ -686,7 +689,7 @@ function make_player(x,y)
 					local random = flr(rnd(9))
 
 					if random < 2 then
-						encounter,imp_encounter,slime_encounter,skeleton_encounter,ghost_encounter,troll_encounter,snake_encounter,flatwoods_encounter=false,false,false,false,false,false,false,false
+						encounter,moth_encounter,imp_encounter,slime_encounter,skeleton_encounter,ghost_encounter,troll_encounter,snake_encounter,flatwoods_encounter=false,false,false,false,false,false,false,false
 						sfx(8)
 					end
 
@@ -810,7 +813,7 @@ function make_player(x,y)
 			--pick up health_item item
 			if check_tile(self.x,self.y,3) then
 				sfx(12)
-				health+=10
+				health+=25
 				max_health+=5
 				self.health_up=true
 				--add to message timer
@@ -1316,6 +1319,50 @@ function make_imp(x,y)
 			--only draw if encounter
 			if imp_encounter and encounter then
 				imp(self.y)
+
+				--display damage and health
+				self:display_damage()
+			end
+		end
+	})
+end
+
+function make_moth(x,y)
+	return make_game_object("moth",x,y,{
+		-- variables
+		max_health=20,
+		health=20,
+		turn=false,
+		turn_timer=60,
+		damage_taken=0,
+		miss=false,
+		damage=7,
+		update=function(self)
+			self:enemy_turn_timer()
+
+			--check if enemy health is 0
+			if (self.health<1) moth_encounter=false encounter=false sfx(11) points+=flr(self.max_health)
+			
+			--only update if encounter
+			if moth_encounter and encounter then
+				--bob sprite
+				self:bob()
+
+				--players turn
+				--take damage
+				self:take_damage(8,12,5,10)
+
+				--enemy turn
+				self:deal_damage(self.damage)
+			else
+				self:enemy_stats_reset()
+			end
+			
+		end,
+		draw=function(self)
+			--only draw if encounter
+			if moth_encounter and encounter then
+				mothman(self.y)
 
 				--display damage and health
 				self:display_damage()
@@ -2096,6 +2143,46 @@ function snake(y)
 	line(65,52+y,66,51+y,1)
 	--tongue
 	line(64,55+y,64,56+y,8)
+end
+
+function mothman(y)
+	--wings
+	circfill(30,53+y,12,1)
+	rectfill(18,56+y,50,98+y,1)
+	circfill(30,53+y,10,5)
+	rectfill(20,56+y,48,98+y,5)
+
+	circfill(98,53+y,12,1)
+	rectfill(18,56+y,110,98+y,1)
+	circfill(98,53+y,10,5)
+	rectfill(20,56+y,108,98+y,5)
+	-- outline
+	rectfill(48,60,80,128,1)
+	-- body
+	rectfill(50,60,78,128,15)
+	--hands
+	hands(y+10,15)
+	-- head
+	circfill(64,35+y,32,1)
+	circfill(64,35+y,30,15)
+	-- eyes
+	circfill(50,39+y,8,2)
+	circfill(78,39+y,8,2)
+	-- cheeks
+	line(45,52+y,47,50+y,2)
+	line(48,52+y,50,50+y,2)
+	line(51,52+y,53,50+y,2)
+	line(73,52+y,75,50+y,2)
+	line(76,52+y,78,50+y,2)
+	line(79,52+y,81,50+y,2)
+	--antenna
+	line(38,20+y,28,10+y,1)
+	circfill(28,10+y,5,1)
+	circfill(28,10+y,3,15)
+
+	line(90,20+y,100,10+y,1)
+	circfill(100,10+y,5,1)
+	circfill(100,10+y,3,15)
 end
 
 function eyes(y)

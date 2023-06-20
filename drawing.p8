@@ -13,8 +13,7 @@ function _init()
 	pal({1,2,3,-15,-16,-3},1)
 	-- choose which character is shown
 	character=1
-	max_char=7
-	hide=false
+	max_char=8
 	y=0
 	frame=0
 	-- choose which background to show
@@ -28,62 +27,17 @@ function _update()
 	mouse_x=stat(32)
 	mouse_y=stat(33)
 	-- arrows to change character
-	if not hide then
-		if btnp(1) then
-			character+=1
-		end
-		if btnp(0) then
-			character-=1
-		end
-		if character>max_char then
-			character=1
-		end
-		if character<1 then
-			character=max_char
-		end
+	if btnp(1) then
+		character+=1
 	end
-	-- arrows to change background
-	if hide then
-		-- move forward with up arrow
-		if background==1 then
-			if btnp(2) then
-				choose_bg=flr(rnd(2))
-				if choose_bg==0 then
-					background=2
-				else
-					background=3
-				end
-				sfx(0)
-			end
-		-- move left
-		elseif background==2 then
-			if btnp(0) then
-				choose_bg=flr(rnd(2))
-				if choose_bg==0 then
-					background=1
-				else
-					background=3
-				end
-				sfx(0)
-			end
-		-- move right
-		elseif background==3 then
-			if btnp(1) then
-				choose_bg=flr(rnd(2))
-				if choose_bg==0 then
-					background=2
-				else
-					background=1
-				end
-				sfx(0)
-			end
-		end
+	if btnp(0) then
+		character-=1
 	end
-	-- x to hide character
-	if btnp(5) and hide then
-		hide=false
-	elseif btnp(5) then
-		hide=true
+	if character>max_char then
+		character=1
+	end
+	if character<1 then
+		character=max_char
 	end
 
 	frame_counter(60)
@@ -100,44 +54,28 @@ end
 
 function _draw()
 	cls(11)
-	if background==1 then
-		--bg_forward()
-		if hide then
-			--spr(64,60,60)
-		end
-	elseif background==2 then
-		--bg_left()
-		if hide then
-			--spr(65,60,60)
-		end
-	elseif background==3 then
-		--bg_right()
-		if hide then
-			--spr(65,60,60,1,1,true)
-		end
-	end
-	if not hide then
-		if character==1 then
-			ghost(y)
-		elseif character==2 then
-			skeleton(y)
-		elseif character==3 then
-			flatwoods(y)
-		elseif character==4 then
-			slime(y)
-		elseif character==5 then
-			troll(y)
-		elseif character==6 then
-			snake(y)
-		elseif character==7 then
-			imp(y)
-		end
+	if character==1 then
+		ghost(y)
+	elseif character==2 then
+		skeleton(y)
+	elseif character==3 then
+		flatwoods(y)
+	elseif character==4 then
+		slime(y)
+	elseif character==5 then
+		troll(y)
+	elseif character==6 then
+		snake(y)
+	elseif character==7 then
+		imp(y)
+	elseif character==8 then
+		mothman(y)
 	end
 	-- mouse cursor and coords
-	--pset(mouse_x,mouse_y,8)
-	--print(mouse_x,0,0,1)
-	--print(mouse_y,0,8,1)
-	--print(choose_bg,0,16,1)
+	pset(mouse_x,mouse_y,8)
+	print(mouse_x,0,0,1)
+	print(mouse_y,0,8,1)
+	print(choose_bg,0,16,1)
 end
 -->8
 -- characters
@@ -326,6 +264,46 @@ function imp(y)
 	circ(64,59+y,5,1)
 	rectfill(59,54+y,69,62+y,2)
 	eyes(y)
+end
+
+function mothman(y)
+	--wings
+	circfill(30,53+y,12,1)
+	rectfill(18,56+y,50,98+y,1)
+	circfill(30,53+y,10,5)
+	rectfill(20,56+y,48,98+y,5)
+
+	circfill(98,53+y,12,1)
+	rectfill(18,56+y,110,98+y,1)
+	circfill(98,53+y,10,5)
+	rectfill(20,56+y,108,98+y,5)
+	-- outline
+	rectfill(48,60,80,128,1)
+	-- body
+	rectfill(50,60,78,128,15)
+	--hands
+	hands(y+10,15)
+	-- head
+	circfill(64,35+y,32,1)
+	circfill(64,35+y,30,15)
+	-- eyes
+	circfill(50,39+y,8,8)
+	circfill(78,39+y,8,8)
+	-- cheeks
+	line(45,52+y,47,50+y,8)
+	line(48,52+y,50,50+y,8)
+	line(51,52+y,53,50+y,8)
+	line(73,52+y,75,50+y,8)
+	line(76,52+y,78,50+y,8)
+	line(79,52+y,81,50+y,8)
+	--antenna
+	line(38,20+y,28,10+y,1)
+	circfill(28,10+y,5,1)
+	circfill(28,10+y,3,15)
+
+	line(90,20+y,100,10+y,1)
+	circfill(100,10+y,5,1)
+	circfill(100,10+y,3,15)
 end
 
 function eyes(y)
